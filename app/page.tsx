@@ -42,25 +42,6 @@ export default function Home() {
 		};
 	}, []);
 
-	const socket = new WebSocket("ws://localhost:8080");
-	socket.onopen = () => {
-		console.log("ws onOpen enteredu");
-	};
-	socket.onmessage = (event) => {
-		const receivedMessage = event.data;
-		console.log(
-			"on message entered, event is: ",
-			event,
-			"event.data is : ",
-			receivedMessage
-		);
-		setText(receivedMessage);
-	};
-
-	socket.onclose = () => {
-		console.log("ws disconnected");
-	};
-
 	useEffect(() => {
 		if (!isLoaded) {
 			return;

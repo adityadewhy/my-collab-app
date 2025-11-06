@@ -3,9 +3,9 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "concurrently \"npm:next-dev\" \"npm:ws-dev\"",
+		"dev": "concurrently \"npm run next-dev\" \"npm run ws-dev\"",
 		"next-dev": "next dev",
-		"ws-dev": "ts-node server.ts",
+		"ws-dev": "NODE_ENV=development ts-node server.ts",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint"

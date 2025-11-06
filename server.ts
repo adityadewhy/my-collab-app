@@ -1,6 +1,8 @@
 import {WebSocket, WebSocketServer} from "ws";
 
-const wss = new WebSocketServer({port: 8080});
+const wss = new WebSocketServer({port: 8080}, () => {
+	console.log("ws server running on 8080");
+});
 wss.on("connection", (ws) => {
 	console.log("a new connection happened");
 
