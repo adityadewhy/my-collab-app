@@ -1,66 +1,84 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import {useEffect, useState, useRef} from "react";
+
+const this_key_saves_text = "keyToSaveText";
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+	const [text, setText] = useState("");
+	const [isLoaded, setIsLoaded] = useState(false);
+
+	const ws = useRef<WebSocket | null>(null);
+	useEffect(() => {
+		const savedText = localStorage.getItem(this_key_saves_text);
+		if (savedText) {
+			setText(savedText);
+		}
+		setIsLoaded(true);
+
+		const socket = new WebSocket("ws://localhost:8080");
+		socket.onopen = () => {
+			console.log("ws onOpen enteredu");
+		};
+		socket.onmessage = (event) => {
+			const receivedMessage = event.data;
+			console.log(
+				"on message entered, event is: ",
+				event,
+				"event.data is : ",
+				receivedMessage
+			);
+			setText(receivedMessage);
+		};
+
+		socket.onclose = () => {
+			console.log("ws disconnected");
+		};
+
+		ws.current = socket;
+		console.log("socket is same as ws.current: ", socket);
+
+		return () => {
+			socket.close();
+		};
+	}, []);
+
+	const socket = new WebSocket("ws://localhost:8080");
+	socket.onopen = () => {
+		console.log("ws onOpen enteredu");
+	};
+	socket.onmessage = (event) => {
+		const receivedMessage = event.data;
+		console.log(
+			"on message entered, event is: ",
+			event,
+			"event.data is : ",
+			receivedMessage
+		);
+		setText(receivedMessage);
+	};
+
+	socket.onclose = () => {
+		console.log("ws disconnected");
+	};
+
+	useEffect(() => {
+		if (!isLoaded) {
+			return;
+		}
+		localStorage.setItem(this_key_saves_text, text);
+	}, [text, isLoaded]);
+
+	const handleChange = (e: any) => {
+		setText(e.target.value);
+		if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+			ws.current.send(e.target.value);
+		}
+	};
+
+	return (
+		<div>
+			<p>trying out localStorage storage settings</p>
+			<textarea placeholder="type here" value={text} onChange={handleChange} />
+		</div>
+	);
 }
